@@ -5,6 +5,14 @@ get_filename_component(MICROPY_DIR ${PROJECT_DIR}/../.. ABSOLUTE)
 include(${MICROPY_DIR}/py/py.cmake)
 include(${MICROPY_DIR}/extmod/extmod.cmake)
 
+if(NOT CMAKE_BUILD_EARLY_EXPANSION)
+    include(${MICROPY_DIR}/py/usermod.cmake)
+    foreach(MOD_INCLUDES ${INCLUDES_USERMOD})
+        list(APPEND MICROPY_CPP_INC_EXTRA ${MOD_INCLUDES})
+    endforeach()
+    list(APPEND MICROPY_CPP_INC_EXTRA ${MICROPY_PY_DIR})
+endif()
+
 set(MICROPY_QSTRDEFS_PORT
     ${PROJECT_DIR}/qstrdefsport.h
 )
@@ -71,6 +79,7 @@ set(MICROPY_SOURCE_PORT
 set(MICROPY_SOURCE_QSTR
     ${MICROPY_SOURCE_PY}
     ${MICROPY_SOURCE_EXTMOD}
+    ${SOURCE_USERMOD}
     ${MICROPY_SOURCE_LIB}
     ${MICROPY_SOURCE_PORT}
 )
@@ -159,6 +168,9 @@ target_compile_options(${MICROPY_TARGET} PUBLIC
     -Wno-missing-field-initializers
 )
 
+# add usermod
+target_link_libraries(${MICROPY_TARGET} usermod)
+
 # Collect all of the include directories and compile definitions for the IDF components.
 foreach(comp ${IDF_COMPONENTS})
     get_target_property(type __idf_${comp} TYPE)
@@ -185,6 +197,8 @@ if(IDF_VERSION_MINOR GREATER_EQUAL 2)
     list(APPEND MICROPY_CPP_INC_EXTRA ${IDF_PATH}/components/soc/soc/${IDF_TARGET}/include)
     list(APPEND MICROPY_CPP_INC_EXTRA ${IDF_PATH}/components/soc/soc/include)
 endif()
+
+message(STATUS "MICROPY_CPP_INC_EXTRA=${MICROPY_CPP_INC_EXTRA}")
 
 # Include the main MicroPython cmake rules.
 include(${MICROPY_DIR}/py/mkrules.cmake)

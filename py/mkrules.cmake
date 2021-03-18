@@ -27,6 +27,8 @@ set(_prefix "-D")
 foreach(_arg ${MICROPY_CPP_DEF})
     list(APPEND MICROPY_CPP_FLAGS ${_prefix}${_arg})
 endforeach()
+
+list(APPEND MICROPY_CPP_FLAGS "-I${MICROPY_GENHDR_DIR}")
 list(APPEND MICROPY_CPP_FLAGS ${MICROPY_CPP_FLAGS_EXTRA})
 
 find_package(Python3 REQUIRED COMPONENTS Interpreter)
@@ -69,7 +71,7 @@ add_custom_command(
 # it was last run, but it looks like it's not possible to specify that with cmake.
 add_custom_command(
     OUTPUT ${MICROPY_QSTRDEFS_LAST}
-    COMMAND ${Python3_EXECUTABLE} ${MICROPY_PY_DIR}/makeqstrdefs.py pp ${CMAKE_C_COMPILER} -E output ${MICROPY_GENHDR_DIR}/qstr.i.last cflags ${MICROPY_CPP_FLAGS} -DNO_QSTR sources ${MICROPY_SOURCE_QSTR}
+    COMMAND ${CMAKE_C_COMPILER} -E ${MICROPY_CPP_FLAGS} -DNO_QSTR ${MICROPY_SOURCE_QSTR} > ${MICROPY_GENHDR_DIR}/qstr.i.last
     DEPENDS ${MICROPY_MODULEDEFS}
         ${MICROPY_SOURCE_QSTR}
     VERBATIM
