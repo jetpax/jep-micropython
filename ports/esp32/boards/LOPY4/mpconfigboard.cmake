@@ -4,7 +4,7 @@ set(SDKCONFIG_DEFAULTS
     boards/sdkconfig.ble
     boards/sdkconfig.spiram
     boards/sdkconfig.240mhz
-    boards/IDAQ/sdkconfig.board
+    boards/LOPY4/sdkconfig.board
 )
 
 set(MICROPY_FROZEN_MANIFEST ${MICROPY_PORT_DIR}/boards/manifest.py)
