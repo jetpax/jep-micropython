@@ -78,7 +78,6 @@ int machine_hw_i2c_transfer(mp_obj_base_t *self_in, uint16_t addr, size_t n, mp_
 
     int data_len = 0;
 
-    // need repeated start to turn bus around if this is a register read transfer
     if (n > 1) {
         // >1 buffers => first cycle must be write so Q slave addr (W)
         i2c_master_write_byte(cmd, addr << 1, true);
@@ -88,7 +87,7 @@ int machine_hw_i2c_transfer(mp_obj_base_t *self_in, uint16_t addr, size_t n, mp_
         ++bufs;
         --n;
         if (flags & MP_MACHINE_I2C_FLAG_READ) {
-            // Q repeated start with slave addr (R)
+            // this is a register read so Q repeated start with slave addr (R)
             i2c_master_start(cmd);
             i2c_master_write_byte(cmd, addr << 1 | MP_MACHINE_I2C_FLAG_READ, true);
         }
