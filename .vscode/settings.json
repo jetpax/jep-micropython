@@ -1,0 +1,5 @@
+{
+    "python.formatting.provider": "black",
+    "C_Cpp.dimInactiveRegions": false,
+    "python.pythonPath": "/Users/jep/bin/python"
+}

@@ -40,6 +40,8 @@
 #include "extmod/vfs_fat.h"
 #include "extmod/vfs_lfs.h"
 #include "genhdr/mpversion.h"
+#include "esp_log.h"
+#include <stdio.h>
 
 extern const mp_obj_type_t mp_fat_vfs_type;
 
@@ -47,24 +49,41 @@ STATIC const qstr os_uname_info_fields[] = {
     MP_QSTR_sysname, MP_QSTR_nodename,
     MP_QSTR_release, MP_QSTR_version, MP_QSTR_machine
 };
-STATIC const MP_DEFINE_STR_OBJ(os_uname_info_sysname_obj, MICROPY_PY_SYS_PLATFORM);
-STATIC const MP_DEFINE_STR_OBJ(os_uname_info_nodename_obj, MICROPY_PY_SYS_PLATFORM);
+STATIC const MP_DEFINE_STR_OBJ(os_uname_info_sysname_obj, MICROPY_HW_BOARD_NAME);
 STATIC const MP_DEFINE_STR_OBJ(os_uname_info_release_obj, MICROPY_VERSION_STRING);
 STATIC const MP_DEFINE_STR_OBJ(os_uname_info_version_obj, MICROPY_GIT_TAG " on " MICROPY_BUILD_DATE);
-STATIC const MP_DEFINE_STR_OBJ(os_uname_info_machine_obj, MICROPY_HW_BOARD_NAME " with " MICROPY_HW_MCU_NAME);
 
-STATIC MP_DEFINE_ATTRTUPLE(
-    os_uname_info_obj,
-    os_uname_info_fields,
-    5,
-    (mp_obj_t)&os_uname_info_sysname_obj,
-    (mp_obj_t)&os_uname_info_nodename_obj,
-    (mp_obj_t)&os_uname_info_release_obj,
-    (mp_obj_t)&os_uname_info_version_obj,
-    (mp_obj_t)&os_uname_info_machine_obj
-    );
+STATIC mp_obj_tuple_t os_uname_info_obj = {
+    .base = {&mp_type_attrtuple},
+    .len = 5,
+    .items = {
+        (mp_obj_t)&os_uname_info_sysname_obj,
+        NULL,
+        (mp_obj_t)&os_uname_info_release_obj,
+        (mp_obj_t)&os_uname_info_version_obj,
+        NULL,
+        (void *)os_uname_info_fields,
+    }
+};
 
 STATIC mp_obj_t os_uname(void) {
+
+    uint8_t base_mac_addr[6] = {0};
+    esp_efuse_mac_get_default(base_mac_addr);
+
+    esp_chip_info_t chip_info;
+    esp_chip_info(&chip_info);
+
+    char *msg;
+
+    asprintf(&msg, "%x%x%x", base_mac_addr[3], base_mac_addr[4], base_mac_addr[5]);
+    os_uname_info_obj.items[1] = mp_obj_new_str(msg, strlen(msg));
+
+    asprintf(&msg, "esp-idf %s on %s rev %d", esp_get_idf_version(), CONFIG_IDF_TARGET, chip_info.revision);
+    os_uname_info_obj.items[4] = mp_obj_new_str(msg, strlen(msg));
+
+    free(msg);
+
     return (mp_obj_t)&os_uname_info_obj;
 }
 STATIC MP_DEFINE_CONST_FUN_OBJ_0(os_uname_obj, os_uname);
