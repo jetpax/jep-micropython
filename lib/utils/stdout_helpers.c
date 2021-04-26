@@ -9,6 +9,16 @@
  * implementation below can be used.
  */
 
+// Send "cooked" string of given length, where every occurrence of
+// LF character is replaced with CR LF.
+void mp_hal_stdout_tx_strn_cooked(const char *str, size_t len) {
+    while (len--) {
+        if (*str == '\n') {
+            mp_hal_stdout_tx_strn("\r", 1);
+        }
+        mp_hal_stdout_tx_strn(str++, 1);
+    }
+}
 
 // Send zero-terminated string
 void mp_hal_stdout_tx_str(const char *str) {

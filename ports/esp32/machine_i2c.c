@@ -75,27 +75,9 @@ int machine_hw_i2c_transfer(mp_obj_base_t *self_in, uint16_t addr, size_t n, mp_
 
     i2c_cmd_handle_t cmd = i2c_cmd_link_create();
     i2c_master_start(cmd);
+    i2c_master_write_byte(cmd, addr << 1 | (flags & MP_MACHINE_I2C_FLAG_READ), true);
 
     int data_len = 0;
-
-    if (n > 1) {
-        // >1 buffers => first cycle must be write so Q slave addr (W)
-        i2c_master_write_byte(cmd, addr << 1, true);
-        // Q first buffer
-        i2c_master_write(cmd, bufs->buf, bufs->len, true);
-        data_len += bufs->len;
-        ++bufs;
-        --n;
-        if (flags & MP_MACHINE_I2C_FLAG_READ) {
-            // this is a register read so Q repeated start with slave addr (R)
-            i2c_master_start(cmd);
-            i2c_master_write_byte(cmd, addr << 1 | MP_MACHINE_I2C_FLAG_READ, true);
-        }
-    } else {
-        // 0/1 buffer => simple transaction, so Q slave address with (R/W) as passed
-        i2c_master_write_byte(cmd, addr << 1 | (flags & MP_MACHINE_I2C_FLAG_READ), true);
-    }
-
     for (; n--; ++bufs) {
         if (flags & MP_MACHINE_I2C_FLAG_READ) {
             i2c_master_read(cmd, bufs->buf, bufs->len, n == 0 ? I2C_MASTER_LAST_NACK : I2C_MASTER_ACK);
