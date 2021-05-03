@@ -1,6 +1,6 @@
 /*
  * This file is part of the MicroPython ESP32 project
- * 
+ *
  * The MIT License (MIT)
  *
  * Copyright (c) 2019 Mike Teachman
@@ -40,21 +40,21 @@
 // 3. any C type, macro, or function prefaced by "machine_i2s" is associated with the MicroPython implementation of I2S
 
 typedef struct _machine_i2s_obj_t {
-    mp_obj_base_t          base;
-    i2s_port_t             id;
-    i2s_comm_format_t      standard;
-    uint8_t                mode;
-    i2s_bits_per_sample_t  dataformat;
-    i2s_channel_fmt_t      channelformat;
-    int32_t                samplerate;
-    int16_t                dmacount;
-    int16_t                dmalen;
-    int32_t                apllrate;
-    int8_t                 bck;
-    int8_t                 ws;
-    int8_t                 sdout;
-    int8_t                 sdin;
-    bool                   used;
+    mp_obj_base_t base;
+    i2s_port_t id;
+    i2s_comm_format_t standard;
+    uint8_t mode;
+    i2s_bits_per_sample_t dataformat;
+    i2s_channel_fmt_t channelformat;
+    int32_t samplerate;
+    int16_t dmacount;
+    int16_t dmalen;
+    int32_t apllrate;
+    int8_t bck;
+    int8_t ws;
+    int8_t sdout;
+    int8_t sdin;
+    bool used;
 } machine_i2s_obj_t;
 
 // Static object mapping to I2S peripherals
@@ -62,8 +62,11 @@ typedef struct _machine_i2s_obj_t {
 //      I2S peripheral 1:  machine_i2s_obj[0]
 //      I2S peripheral 2:  machine_i2s_obj[1]
 STATIC machine_i2s_obj_t machine_i2s_obj[I2S_NUM_MAX] = {
-        [0].used = false,
-        [1].used = false };
+    [0].used = false,
+    #if !CONFIG_IDF_TARGET_ESP32S2
+    [1].used = false
+    #endif
+};
 
 STATIC void machine_i2s_init_helper(machine_i2s_obj_t *self, size_t n_pos_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
 
@@ -85,16 +88,16 @@ STATIC void machine_i2s_init_helper(machine_i2s_obj_t *self, size_t n_pos_args, 
     static const mp_arg_t allowed_args[] = {
         { MP_QSTR_bck,              MP_ARG_KW_ONLY | MP_ARG_REQUIRED | MP_ARG_OBJ,   {.u_obj = MP_OBJ_NULL} },
         { MP_QSTR_ws,               MP_ARG_KW_ONLY | MP_ARG_REQUIRED | MP_ARG_OBJ,   {.u_obj = MP_OBJ_NULL} },
-        { MP_QSTR_sdout,            MP_ARG_KW_ONLY                   | MP_ARG_OBJ,   {.u_obj = MP_OBJ_NULL} },
-        { MP_QSTR_sdin,             MP_ARG_KW_ONLY                   | MP_ARG_OBJ,   {.u_obj = MP_OBJ_NULL} },
-        { MP_QSTR_standard,         MP_ARG_KW_ONLY                   | MP_ARG_INT,   {.u_int = I2S_COMM_FORMAT_I2S} },
+        { MP_QSTR_sdout,            MP_ARG_KW_ONLY | MP_ARG_OBJ,   {.u_obj = MP_OBJ_NULL} },
+        { MP_QSTR_sdin,             MP_ARG_KW_ONLY | MP_ARG_OBJ,   {.u_obj = MP_OBJ_NULL} },
+        { MP_QSTR_standard,         MP_ARG_KW_ONLY | MP_ARG_INT,   {.u_int = I2S_COMM_FORMAT_I2S} },
         { MP_QSTR_mode,             MP_ARG_KW_ONLY | MP_ARG_REQUIRED | MP_ARG_INT,   {.u_int = -1} },
         { MP_QSTR_dataformat,       MP_ARG_KW_ONLY | MP_ARG_REQUIRED | MP_ARG_INT,   {.u_int = -1} },
         { MP_QSTR_channelformat,    MP_ARG_KW_ONLY | MP_ARG_REQUIRED | MP_ARG_INT,   {.u_int = -1} },
         { MP_QSTR_samplerate,       MP_ARG_KW_ONLY | MP_ARG_REQUIRED | MP_ARG_INT,   {.u_int = -1} },
-        { MP_QSTR_dmacount,         MP_ARG_KW_ONLY                   | MP_ARG_INT,   {.u_int = 16} },
-        { MP_QSTR_dmalen,           MP_ARG_KW_ONLY                   | MP_ARG_INT,   {.u_int = 64} },
-        { MP_QSTR_apllrate,         MP_ARG_KW_ONLY                   | MP_ARG_INT,   {.u_int = 0} },
+        { MP_QSTR_dmacount,         MP_ARG_KW_ONLY | MP_ARG_INT,   {.u_int = 16} },
+        { MP_QSTR_dmalen,           MP_ARG_KW_ONLY | MP_ARG_INT,   {.u_int = 64} },
+        { MP_QSTR_apllrate,         MP_ARG_KW_ONLY | MP_ARG_INT,   {.u_int = 0} },
     };
 
     mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
@@ -220,7 +223,7 @@ STATIC void machine_i2s_init_helper(machine_i2s_obj_t *self, size_t n_pos_args, 
             break;
         default:
             // this error not documented in ESP-IDF
-            mp_raise_msg(&mp_type_OSError, MP_ERROR_TEXT("I2S driver install:  Undocumented error")); 
+            mp_raise_msg(&mp_type_OSError, MP_ERROR_TEXT("I2S driver install:  Undocumented error"));
             break;
     }
 
@@ -242,7 +245,7 @@ STATIC void machine_i2s_init_helper(machine_i2s_obj_t *self, size_t n_pos_args, 
             break;
         default:
             // this error not documented in ESP-IDF
-            mp_raise_msg(&mp_type_OSError, MP_ERROR_TEXT("I2S set pin:  Undocumented error")); 
+            mp_raise_msg(&mp_type_OSError, MP_ERROR_TEXT("I2S set pin:  Undocumented error"));
             break;
     }
 
@@ -254,18 +257,18 @@ STATIC void machine_i2s_init_helper(machine_i2s_obj_t *self, size_t n_pos_args, 
 STATIC void machine_i2s_print(const mp_print_t *print, mp_obj_t self_in, mp_print_kind_t kind) {
     machine_i2s_obj_t *self = MP_OBJ_TO_PTR(self_in);
     mp_printf(print, "I2S(id=%u, bck=%d, ws=%d, sdout=%d, sdin=%d\n"
-            "standard=%u, mode=%u,\n"
-            "dataformat=%u, channelformat=%u,\n"
-            "samplerate=%d,\n"
-            "dmacount=%d, dmalen=%d,\n"
-            "apllrate=%d)",
-            self->id, self->bck, self->ws, self->sdout, self->sdin,
-            self->standard, self->mode,
-            self->dataformat, self->channelformat,
-            self->samplerate,
-            self->dmacount, self->dmalen,
-            self->apllrate
-            );
+        "standard=%u, mode=%u,\n"
+        "dataformat=%u, channelformat=%u,\n"
+        "samplerate=%d,\n"
+        "dmacount=%d, dmalen=%d,\n"
+        "apllrate=%d)",
+        self->id, self->bck, self->ws, self->sdout, self->sdin,
+        self->standard, self->mode,
+        self->dataformat, self->channelformat,
+        self->samplerate,
+        self->dmacount, self->dmalen,
+        self->apllrate
+        );
 }
 
 STATIC mp_obj_t machine_i2s_make_new(const mp_obj_type_t *type, size_t n_pos_args, size_t n_kw_args, const mp_obj_t *args) {
@@ -278,8 +281,10 @@ STATIC mp_obj_t machine_i2s_make_new(const mp_obj_type_t *type, size_t n_pos_arg
     i2s_port_t i2s_id = mp_obj_get_int(args[0]);
     if (i2s_id == I2S_NUM_0) {
         self = &machine_i2s_obj[0];
+        #if !CONFIG_IDF_TARGET_ESP32S2
     } else if (i2s_id == I2S_NUM_1) {
         self = &machine_i2s_obj[1];
+        #endif
     } else {
         mp_raise_ValueError(MP_ERROR_TEXT("I2S ID is not valid"));
     }
@@ -289,9 +294,9 @@ STATIC mp_obj_t machine_i2s_make_new(const mp_obj_type_t *type, size_t n_pos_arg
 
     // is I2S peripheral already in use?
     // if (self->used) {
-        // mp_raise_ValueError(MP_ERROR_TEXT("I2S port is already in use"));
+    // mp_raise_ValueError(MP_ERROR_TEXT("I2S port is already in use"));
     // }
-    
+
 
     mp_map_t kw_args;
     mp_map_init_fixed_table(&kw_args, n_kw_args, args + n_pos_args);
@@ -312,7 +317,7 @@ STATIC mp_obj_t machine_i2s_readinto(mp_uint_t n_pos_args, const mp_obj_t *pos_a
     enum { ARG_buf, ARG_timeout };
     STATIC const mp_arg_t allowed_args[] = {
         { MP_QSTR_buf,                      MP_ARG_REQUIRED | MP_ARG_OBJ,  {.u_obj = mp_const_none} },
-        { MP_QSTR_timeout, MP_ARG_KW_ONLY                   | MP_ARG_INT,  {.u_int = -1} },
+        { MP_QSTR_timeout, MP_ARG_KW_ONLY | MP_ARG_INT,  {.u_int = -1} },
     };
     mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
     mp_arg_parse_all(n_pos_args - 1, pos_args + 1, kw_args, MP_ARRAY_SIZE(args), allowed_args, args);
@@ -320,7 +325,7 @@ STATIC mp_obj_t machine_i2s_readinto(mp_uint_t n_pos_args, const mp_obj_t *pos_a
     machine_i2s_obj_t *self = pos_args[0];
 
     // if (!self->used) {
-        // mp_raise_ValueError(MP_ERROR_TEXT("I2S port is not initialized"));
+    // mp_raise_ValueError(MP_ERROR_TEXT("I2S port is not initialized"));
     // }
 
     if (self->mode != (I2S_MODE_MASTER | I2S_MODE_RX)) {
@@ -345,7 +350,7 @@ STATIC mp_obj_t machine_i2s_readinto(mp_uint_t n_pos_args, const mp_obj_t *pos_a
             break;
         default:
             // this error not documented in ESP-IDF
-            mp_raise_msg(&mp_type_OSError, MP_ERROR_TEXT("I2S read:  Undocumented error")); 
+            mp_raise_msg(&mp_type_OSError, MP_ERROR_TEXT("I2S read:  Undocumented error"));
             break;
     }
 
@@ -357,7 +362,7 @@ STATIC mp_obj_t machine_i2s_write(mp_uint_t n_pos_args, const mp_obj_t *pos_args
     enum { ARG_buf, ARG_timeout };
     STATIC const mp_arg_t allowed_args[] = {
         { MP_QSTR_buf,                      MP_ARG_REQUIRED | MP_ARG_OBJ,  {.u_obj = mp_const_none} },
-        { MP_QSTR_timeout, MP_ARG_KW_ONLY                   | MP_ARG_INT,  {.u_int = -1} },
+        { MP_QSTR_timeout, MP_ARG_KW_ONLY | MP_ARG_INT,  {.u_int = -1} },
     };
     mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
     mp_arg_parse_all(n_pos_args - 1, pos_args + 1, kw_args, MP_ARRAY_SIZE(args), allowed_args, args);
@@ -390,7 +395,7 @@ STATIC mp_obj_t machine_i2s_write(mp_uint_t n_pos_args, const mp_obj_t *pos_args
             break;
         default:
             // this error not documented in ESP-IDF
-            mp_raise_msg(&mp_type_OSError, MP_ERROR_TEXT("I2S write:  Undocumented error")); 
+            mp_raise_msg(&mp_type_OSError, MP_ERROR_TEXT("I2S write:  Undocumented error"));
             break;
     }
 
@@ -431,7 +436,9 @@ STATIC const mp_rom_map_elem_t machine_i2s_locals_dict_table[] = {
 
     // Constants
     { MP_ROM_QSTR(MP_QSTR_NUM0),            MP_ROM_INT(I2S_NUM_0) },
+    #if !CONFIG_IDF_TARGET_ESP32S2
     { MP_ROM_QSTR(MP_QSTR_NUM1),            MP_ROM_INT(I2S_NUM_1) },
+    #endif
     { MP_ROM_QSTR(MP_QSTR_PHILIPS),         MP_ROM_INT(I2S_COMM_FORMAT_I2S) },
     { MP_ROM_QSTR(MP_QSTR_LSB),             MP_ROM_INT(I2S_COMM_FORMAT_I2S | I2S_COMM_FORMAT_I2S_LSB) },
     // note:  ESP-IDF does not implement the MSB standard (even though the Macro I2S_COMM_FORMAT_I2S_MSB is defined)
@@ -453,5 +460,5 @@ const mp_obj_type_t machine_i2s_type = {
     .name = MP_QSTR_I2S,
     .print = machine_i2s_print,
     .make_new = machine_i2s_make_new,
-    .locals_dict = (mp_obj_dict_t *) &machine_i2s_locals_dict,
+    .locals_dict = (mp_obj_dict_t *)&machine_i2s_locals_dict,
 };
