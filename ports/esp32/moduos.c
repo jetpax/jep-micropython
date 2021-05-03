@@ -76,7 +76,7 @@ STATIC mp_obj_t os_uname(void) {
 
     char *msg;
 
-    asprintf(&msg, "%x%x%x", base_mac_addr[3], base_mac_addr[4], base_mac_addr[5]);
+    asprintf(&msg, "%02x%02x%02x", base_mac_addr[3], base_mac_addr[4], base_mac_addr[5]);
     os_uname_info_obj.items[1] = mp_obj_new_str(msg, strlen(msg));
 
     asprintf(&msg, "esp-idf %s on %s rev %d", esp_get_idf_version(), CONFIG_IDF_TARGET, chip_info.revision);
